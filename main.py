@@ -1,6 +1,7 @@
 from fastapi import FastAPI
-import sqlite3
+from openai import RateLimitError
 from db_utils import get_order_by_id, get_customer_by_id
+from llm_utils import simple_chat
 
 app = FastAPI()
 
@@ -23,3 +24,16 @@ def get_customer(customer_id: str):
         return customer
     else:
         return {"error": "Customer not found"}
+    
+@app.get("/chat")
+def chat(query: str):
+    try:
+        answer = simple_chat(query)
+        return {"query": query, "answer": answer}
+    except RateLimitError:
+        return {
+            "query": query,
+            "error": "OpenAI API quota exceeded. Please check billing/quota."
+        }
+    except Exception as e:
+        return {"query": query, "error": str(e)}
