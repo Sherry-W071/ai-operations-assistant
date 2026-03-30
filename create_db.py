@@ -13,7 +13,18 @@ CREATE TABLE IF NOT EXISTS orders (
 )
 """)
 
+orders_data = [
+    ("1001", "ABC Textile", "Delayed", 12000.0, "Raw material shortage"),
+    ("1002", "Blue Yarn Co", "Shipped", 8500.0, "None"),
+    ("1003", "Ever Wool Ltd", "Processing", 15000.0, "Machine maintenance")
+]
+
+cursor.executemany(
+    "INSERT OR REPLACE INTO orders VALUES (?, ?, ?, ?, ?)",
+    orders_data
+)
+
 conn.commit()
 conn.close()
 
-print("Database and table created successfully.")
+print("Orders inserted successfully.")

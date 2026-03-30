@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import sqlite3
 
 app = FastAPI()
 
@@ -6,14 +7,23 @@ app = FastAPI()
 def home():
     return {"message": "Hello, AI Operations Assistant!"}
 
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
+@app.get("/order/{order_id}")
+def get_order(order_id: str):
+    conn = sqlite3.connect("operations.db")
+    cursor = conn.cursor()
 
-@app.get("/hello")
-def say_hello():
-    return {"greeting": "Hi, this backend is working."}
+    cursor.execute("SELECT * FROM orders WHERE order_id = ?", (order_id,))
+    row = cursor.fetchone()
 
-@app.get("/hello/{name}")
-def say_hello(name:str):
-    return {"message": f"Hello, {name}!"}
+    conn.close()
+
+    if row:
+        return {
+            "order_id": row[0],
+            "customer_name": row[1],
+            "status": row[2],
+            "amount": row[3],
+            "issue": row[4]
+        }
+    else:
+        return {"error": "Order not found"}
