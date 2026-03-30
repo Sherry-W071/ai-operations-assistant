@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import sqlite3
+from db_utils import get_order_by_id, get_customer_by_id
 
 app = FastAPI()
 
@@ -9,21 +10,16 @@ def home():
 
 @app.get("/order/{order_id}")
 def get_order(order_id: str):
-    conn = sqlite3.connect("operations.db")
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM orders WHERE order_id = ?", (order_id,))
-    row = cursor.fetchone()
-
-    conn.close()
-
-    if row:
-        return {
-            "order_id": row[0],
-            "customer_name": row[1],
-            "status": row[2],
-            "amount": row[3],
-            "issue": row[4]
-        }
+    order = get_order_by_id(order_id)
+    if order:
+        return order
     else:
         return {"error": "Order not found"}
+    
+@app.get("/customer/{customer_id}")
+def get_customer(customer_id: str):
+    customer = get_customer_by_id(customer_id)
+    if customer:
+        return customer
+    else:
+        return {"error": "Customer not found"}
